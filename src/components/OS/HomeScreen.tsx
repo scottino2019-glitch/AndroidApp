@@ -52,63 +52,64 @@ export const APPS: AppConfig[] = [
     color: 'bg-amber-600', 
     externalUrl: 'https://quaderni-per-esercizi.vercel.app/index.html' 
   },
-  { 
-    "id": "esercizi-cinese", 
-    "name": "Cinese", 
-    "icon": "Languages", 
-    "color": "bg-red-600", 
-    "externalUrl": "https://esercizi-lingua-cinese.vercel.app/" 
-  },
-  { 
-    "id": "pdf-notepad", 
-    "name": "PDF Notepad", 
-    "icon": "FileEdit", 
-    "color": "bg-blue-400", 
-    "externalUrl": "pdf-notepad.html" 
-  },
-  { 
-    "id": "liste", 
-    "name": "Liste", 
-    "icon": "ListChecks", 
-    "color": "bg-slate-500", 
-    "externalUrl": "liste.html" 
-  },
-  { 
-    "id": "pdf-editor", 
-    "name": "PDF Editor", 
-    "icon": "FileType2", 
-    "color": "bg-orange-600", 
-    "externalUrl": "pdf-editor.html" 
-  },
-  { 
-    "id": "eserciziario", 
-    "name": "Eserciziario", 
-    "icon": "BookOpenText", 
-    "color": "bg-emerald-600", 
-    "externalUrl": "eserciziario.html" 
-  },
-  { 
-    "id": "diario", 
-    "name": "Diario", 
-    "icon": "BookHeart", 
-    "color": "bg-pink-500", 
-    "externalUrl": "https://diario-personale-alpha.vercel.app/" 
-  },
-  { 
-    "id": "traduttore-pdf", 
-    "name": "Traduttore PDF", 
-    "icon": "Type", 
-    "color": "bg-indigo-600", 
-    "externalUrl": "traduttore+pdf.html" 
-  },
-  { 
-    "id": "scrivere-pdf", 
-    "name": "Scrivi PDF", 
-    "icon": "PenTool", 
-    "color": "bg-cyan-600", 
-    "externalUrl": "scrivere-pdf.html" 
-  },
+  
 
+  { 
+    id: 'esercizi-cinese', 
+    name: 'Cinese', 
+    icon: Languages, // NO VIRGOLETTE
+    color: 'bg-red-600', 
+    externalUrl: 'https://esercizi-lingua-cinese.vercel.app/' 
+  },
+  { 
+    id: 'pdf-notepad', 
+    name: 'PDF Notepad', 
+    icon: FileEdit, // NO VIRGOLETTE
+    color: 'bg-blue-400', 
+    externalUrl: 'pdf-notepad.html' 
+  },
+  { 
+    id: 'liste', 
+    name: 'Liste', 
+    icon: ListChecks, 
+    color: 'bg-slate-500', 
+    externalUrl: 'liste.html' 
+  },
+  { 
+    id: 'pdf-editor', 
+    name: 'PDF Editor', 
+    icon: FileType2, 
+    color: 'bg-orange-600', 
+    externalUrl: 'pdf-editor.html' 
+  },
+  { 
+    id: 'eserciziario', 
+    name: 'Eserciziario', 
+    icon: BookOpenText, 
+    color: 'bg-emerald-600', 
+    externalUrl: 'eserciziario.html' 
+  },
+  { 
+    id: 'diario', 
+    name: 'Diario', 
+    icon: BookHeart, 
+    color: 'bg-pink-500', 
+    externalUrl: 'https://diario-personale-alpha.vercel.app/' 
+  },
+  { 
+    id: 'traduttore-pdf', 
+    name: 'Traduttore PDF', 
+    icon: Type, 
+    color: 'bg-indigo-600', 
+    externalUrl: 'traduttore+pdf.html' 
+  },
+  { 
+    id: 'scrivere-pdf', 
+    name: 'Scrivi PDF', 
+    icon: PenTool, 
+    color: 'bg-cyan-600', 
+    externalUrl: 'scrivere-pdf.html' 
+  }
 
   // Esempio per un file locale:
   // { id: 'agenda', name: 'Agenda', icon: Globe, color: 'bg-orange-500', externalUrl: '/agenda.html' },
