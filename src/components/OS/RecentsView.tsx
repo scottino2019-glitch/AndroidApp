@@ -7,16 +7,19 @@ import { APPS } from './HomeScreen';
 export default function RecentsView() {
   const { isRecentsOpen, recentApps, openApp, toggleRecents } = useOS();
 
+  if (!isRecentsOpen) return null;
+
   return (
     <AnimatePresence>
-      {isRecentsOpen && (
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/60 backdrop-blur-md z-[60] flex flex-col p-6"
-          onClick={toggleRecents}
-        >
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 bg-black/60 backdrop-blur-md z-[60] flex flex-col p-6"
+        onClick={(e) => {
+          if (e.target === e.currentTarget) toggleRecents();
+        }}
+      >
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-2xl font-bold text-white">App Recenti</h2>
             <button onClick={toggleRecents} className="p-2 text-white/60 hover:text-white">
@@ -58,7 +61,6 @@ export default function RecentsView() {
             )}
           </div>
         </motion.div>
-      )}
     </AnimatePresence>
   );
 }
