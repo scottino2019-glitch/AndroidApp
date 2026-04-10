@@ -66,28 +66,28 @@ export const APPS: AppConfig[] = [
     name: 'PDF Notepad', 
     icon: FileEdit, // NO VIRGOLETTE
     color: 'bg-blue-400', 
-    externalUrl: 'pdf-notepad.html' 
+    externalUrl: '/ pdf-notepad.html' 
   },
   { 
     id: 'liste', 
     name: 'Liste', 
     icon: ListChecks, 
     color: 'bg-slate-500', 
-    externalUrl: 'liste.html' 
+    externalUrl: '/liste.html' 
   },
   { 
     id: 'pdf-editor', 
     name: 'PDF Editor', 
     icon: FileType2, 
     color: 'bg-orange-600', 
-    externalUrl: 'pdf-editor.html' 
+    externalUrl: '/pdf-editor.html' 
   },
   { 
     id: 'eserciziario', 
     name: 'Eserciziario', 
     icon: BookImage, 
     color: 'bg-emerald-600', 
-    externalUrl: 'eserciziario.html' 
+    externalUrl: '/eserciziario.html' 
   },
   { 
     id: 'diario', 
@@ -101,14 +101,14 @@ export const APPS: AppConfig[] = [
     name: 'Traduttore PDF', 
     icon: Type, 
     color: 'bg-indigo-600', 
-    externalUrl: 'traduttore+pdf.html' 
+    externalUrl: '/traduttore+pdf.html' 
   },
   { 
     id: 'scrivere-pdf', 
     name: 'Scrivi PDF', 
     icon: PenTool, 
     color: 'bg-cyan-600', 
-    externalUrl: 'scrivere-pdf.html' 
+    externalUrl: '/scrivere-pdf.html' 
   }
 
   // Esempio per un file locale:
