@@ -25,11 +25,11 @@ export const APPS: AppConfig[] = [
   },
   // --- AGGIUNGI QUI LE TUE NUOVE APP ---
   { 
-    id: 'pdf-editor', 
-    name: 'Editor PDF', 
+    id: 'text-editor', 
+    name: 'Editor Text', 
     icon: Signature, 
     color: 'bg-red-500', 
-    externalUrl: 'https://pdf-editor-text.vercel.app' 
+    externalUrl: 'https://editor-di-testo.vercel.app/' 
   },
   { 
     id: 'app-studio', 
