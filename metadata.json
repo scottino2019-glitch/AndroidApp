@@ -1,0 +1,5 @@
+{
+  "name": "DroidWeb OS",
+  "description": "Un ambiente di lavoro simile ad Android con app integrate e un file system condiviso.",
+  "requestFramePermissions": []
+}
