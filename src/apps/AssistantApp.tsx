@@ -1,10 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { GoogleGenAI } from '@google/genai';
-import { Send, Bot, User, Save, Loader2 } from 'lucide-react';
+import { Send, Bot, User, Save, Loader2, AlertCircle } from 'lucide-react';
 import { useVFS } from '../hooks/useVFS';
 import { cn } from '../lib/utils';
-
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 export default function AssistantApp() {
   const [messages, setMessages] = useState<{ role: 'user' | 'assistant', content: string }[]>([
@@ -15,12 +13,28 @@ export default function AssistantApp() {
   const { writeFile } = useVFS();
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // Inizializzazione lazy dell'IA
+  const ai = useMemo(() => {
+    const key = process.env.GEMINI_API_KEY;
+    if (!key || key === 'MY_GEMINI_API_KEY' || key === '') return null;
+    return new GoogleGenAI({ apiKey: key });
+  }, []);
+
   useEffect(() => {
     scrollRef.current?.scrollTo(0, scrollRef.current.scrollHeight);
   }, [messages]);
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
+
+    if (!ai) {
+      setMessages(prev => [...prev, 
+        { role: 'user', content: input.trim() },
+        { role: 'assistant', content: "⚠️ Errore: Chiave API non configurata. Configura GEMINI_API_KEY nelle impostazioni del tuo hosting (Netlify/GitHub)." }
+      ]);
+      setInput('');
+      return;
+    }
 
     const userMsg = input.trim();
     setInput('');
@@ -40,7 +54,7 @@ export default function AssistantApp() {
       setMessages(prev => [...prev, { role: 'assistant', content: aiText }]);
     } catch (error) {
       console.error(error);
-      setMessages(prev => [...prev, { role: 'assistant', content: "Errore di connessione con l'IA." }]);
+      setMessages(prev => [...prev, { role: 'assistant', content: "Errore di connessione con l'IA. Verifica la tua chiave API." }]);
     } finally {
       setIsLoading(false);
     }
