@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Folder, FileText, Bot, Settings, Globe } from 'lucide-react';
+import { Folder, FileText, Bot, Settings, Globe, Signature, CalendarHeart, NotebookPen } from 'lucide-react';
 import { useOS } from '../../OSContext';
 import { AppConfig } from '../../types';
 import { APP_COLORS } from '../../lib/utils';
@@ -24,6 +24,34 @@ export const APPS: AppConfig[] = [
     component: SettingsApp 
   },
   // --- AGGIUNGI QUI LE TUE NUOVE APP ---
+  { 
+    id: 'pdf-editor', 
+    name: 'Editor PDF', 
+    icon: Signature, 
+    color: 'bg-red-500', 
+    externalUrl: 'https://pdf-editor-text.vercel.app' 
+  },
+  { 
+    id: 'app-studio', 
+    name: 'App Studio', 
+    icon: Signature, 
+    color: 'bg-indigo-500', 
+    externalUrl: 'https://le-app-studio.netlify.app' 
+  },
+  { 
+    id: 'ufficio', 
+    name: 'Ufficio', 
+    icon: CalendarHeart, 
+    color: 'bg-teal-500', 
+    externalUrl: 'https://ufficio-personale.netlify.app' 
+  },
+  { 
+    id: 'quaderni', 
+    name: 'Quaderni', 
+    icon: NotebookPen, 
+    color: 'bg-amber-600', 
+    externalUrl: 'https://quaderni-per-esercizi.vercel.app/index.html' 
+  },
   // Esempio per un file locale:
   // { id: 'agenda', name: 'Agenda', icon: Globe, color: 'bg-orange-500', externalUrl: '/agenda.html' },
   { 
