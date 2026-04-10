@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { GoogleGenAI } from '@google/genai';
 import { Send, Bot, User, Save, Loader2, AlertCircle } from 'lucide-react';
-import { useVFS } from '../hooks/useVFS';
+import { useVFS } from '../VFSContext';
+import { useOS } from '../OSContext';
 import { cn } from '../lib/utils';
 
 export default function AssistantApp() {
@@ -11,6 +12,7 @@ export default function AssistantApp() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { writeFile } = useVFS();
+  const { showToast } = useOS();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Inizializzazione lazy dell'IA
@@ -63,7 +65,7 @@ export default function AssistantApp() {
   const saveToFiles = (content: string) => {
     const fileName = `Note_AI_${new Date().getTime()}.txt`;
     writeFile(fileName, content);
-    alert(`Salvato come ${fileName}`);
+    showToast(`Salvato come ${fileName}`);
   };
 
   return (

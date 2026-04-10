@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { Folder, FileText, Image, FileJson, Trash2, Search, MoreVertical, ChevronRight } from 'lucide-react';
-import { useVFS } from '../hooks/useVFS';
+import { useVFS } from '../VFSContext';
 import { useOS } from '../OSContext';
 import { cn } from '../lib/utils';
 import { VFSFile } from '../types';
 
 export default function FilesApp() {
   const { files, deleteFile } = useVFS();
-  const { openApp } = useOS();
+  const { openApp, showConfirm, showToast } = useOS();
   const [search, setSearch] = useState('');
 
   const filteredFiles = (Object.values(files) as VFSFile[]).filter(f => 
@@ -75,7 +75,13 @@ export default function FilesApp() {
               </div>
               <div className="flex items-center gap-2">
                 <button 
-                  onClick={(e) => { e.stopPropagation(); deleteFile(file.name); }}
+                  onClick={(e) => { 
+                    e.stopPropagation(); 
+                    showConfirm(`Vuoi davvero eliminare "${file.name}"?`, () => {
+                      deleteFile(file.name);
+                      showToast('File eliminato');
+                    });
+                  }}
                   className="p-2 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
                 >
                   <Trash2 size={18} />

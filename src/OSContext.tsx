@@ -7,6 +7,13 @@ interface OSContextType extends OSState {
   closeApp: () => void;
   setWallpaper: (url: string) => void;
   toggleLock: () => void;
+  showToast: (message: string) => void;
+  showConfirm: (message: string, onConfirm: () => void) => void;
+  toggleRecents: () => void;
+  isRecentsOpen: boolean;
+  toast: string | null;
+  confirmDialog: { message: string, onConfirm: () => void } | null;
+  setConfirmDialog: (val: any) => void;
 }
 
 const OSContext = createContext<OSContextType | undefined>(undefined);
@@ -19,16 +26,35 @@ export function OSProvider({ children }: { children: React.ReactNode }) {
     isLocked: false,
   });
 
+  const [toast, setToast] = useState<string | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState<{ message: string, onConfirm: () => void } | null>(null);
+  const [isRecentsOpen, setIsRecentsOpen] = useState(false);
+
+  const showToast = useCallback((message: string) => {
+    setToast(message);
+    setTimeout(() => setToast(null), 3000);
+  }, []);
+
+  const showConfirm = useCallback((message: string, onConfirm: () => void) => {
+    setConfirmDialog({ message, onConfirm });
+  }, []);
+
+  const toggleRecents = useCallback(() => {
+    setIsRecentsOpen(prev => !prev);
+  }, []);
+
   const openApp = useCallback((id: string) => {
     setState(prev => ({
       ...prev,
       activeAppId: id,
       recentApps: [id, ...prev.recentApps.filter(a => a !== id)].slice(0, 5),
     }));
+    setIsRecentsOpen(false);
   }, []);
 
   const closeApp = useCallback(() => {
     setState(prev => ({ ...prev, activeAppId: null }));
+    setIsRecentsOpen(false);
   }, []);
 
   const setWallpaper = useCallback((url: string) => {
@@ -40,7 +66,20 @@ export function OSProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <OSContext.Provider value={{ ...state, openApp, closeApp, setWallpaper, toggleLock }}>
+    <OSContext.Provider value={{ 
+      ...state, 
+      openApp, 
+      closeApp, 
+      setWallpaper, 
+      toggleLock, 
+      showToast, 
+      showConfirm, 
+      toast, 
+      confirmDialog, 
+      setConfirmDialog,
+      toggleRecents,
+      isRecentsOpen
+    }}>
       {children}
     </OSContext.Provider>
   );

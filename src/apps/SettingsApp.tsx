@@ -1,7 +1,7 @@
 import React from 'react';
 import { Palette, Trash2, Info, Shield, ChevronRight, Monitor } from 'lucide-react';
 import { useOS } from '../OSContext';
-import { useVFS } from '../hooks/useVFS';
+import { useVFS } from '../VFSContext';
 
 const WALLPAPERS = [
   'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop',
@@ -12,14 +12,14 @@ const WALLPAPERS = [
 ];
 
 export default function SettingsApp() {
-  const { wallpaper, setWallpaper } = useOS();
+  const { wallpaper, setWallpaper, showConfirm, showToast } = useOS();
   const { clearStorage } = useVFS();
 
   const handleReset = () => {
-    if (confirm('Sei sicuro di voler cancellare tutti i file? Questa azione è irreversibile.')) {
+    showConfirm('Sei sicuro di voler cancellare tutti i file? Questa azione è irreversibile.', () => {
       clearStorage();
-      alert('Sistema ripristinato.');
-    }
+      showToast('Sistema ripristinato.');
+    });
   };
 
   return (

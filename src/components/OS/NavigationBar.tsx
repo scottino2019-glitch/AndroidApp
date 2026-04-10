@@ -3,7 +3,7 @@ import { ChevronLeft, Home, Square } from 'lucide-react';
 import { useOS } from '../../OSContext';
 
 export default function NavigationBar() {
-  const { closeApp, activeAppId } = useOS();
+  const { closeApp, activeAppId, toggleRecents } = useOS();
 
   return (
     <div className="h-14 flex items-center justify-around px-4 bg-black/20 backdrop-blur-md border-t border-white/10 z-50">
@@ -20,6 +20,7 @@ export default function NavigationBar() {
         <Home size={24} />
       </button>
       <button 
+        onClick={toggleRecents}
         className="p-3 text-white/80 hover:text-white active:scale-90 transition-all"
       >
         <Square size={20} />

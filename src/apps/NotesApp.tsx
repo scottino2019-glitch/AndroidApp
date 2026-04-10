@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Save, Plus, Trash2, FileText, ChevronLeft } from 'lucide-react';
-import { useVFS } from '../hooks/useVFS';
+import { useVFS } from '../VFSContext';
+import { useOS } from '../OSContext';
 import { cn } from '../lib/utils';
 import { VFSFile } from '../types';
 
 export default function NotesApp() {
   const { files, writeFile, deleteFile } = useVFS();
+  const { showToast, showConfirm } = useOS();
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [editingFileName, setEditingFileName] = useState<string | null>(null);
   const [content, setContent] = useState('');
@@ -44,7 +46,7 @@ export default function NotesApp() {
 
     writeFile(fileName, content);
     setEditingFileName(fileName);
-    alert('Salvato!');
+    showToast('Nota salvata!');
   };
 
   if (isEditorOpen) {
@@ -105,7 +107,13 @@ export default function NotesApp() {
                   {new Date(file.updatedAt).toLocaleDateString()}
                 </span>
                 <button 
-                  onClick={(e) => { e.stopPropagation(); deleteFile(file.name); }}
+                  onClick={(e) => { 
+                    e.stopPropagation(); 
+                    showConfirm(`Vuoi eliminare la nota "${file.name}"?`, () => {
+                      deleteFile(file.name);
+                      showToast('Nota eliminata');
+                    });
+                  }}
                   className="p-2 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
                 >
                   <Trash2 size={16} />
