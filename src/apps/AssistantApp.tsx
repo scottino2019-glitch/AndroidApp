@@ -17,8 +17,11 @@ export default function AssistantApp() {
 
   // Inizializzazione lazy dell'IA
   const ai = useMemo(() => {
-    const key = process.env.GEMINI_API_KEY;
-    if (!key || key === 'MY_GEMINI_API_KEY' || key === '') return null;
+    const key = import.meta.env.VITE_GEMINI_API_KEY; 
+  
+  if (!key || key === 'MY_GEMINI_API_KEY' || key === '') return null;
+  return new GoogleGenAI({ apiKey: key });
+}, []);
     return new GoogleGenAI({ apiKey: key });
   }, []);
 
