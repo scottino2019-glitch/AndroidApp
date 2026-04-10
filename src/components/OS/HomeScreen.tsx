@@ -52,13 +52,6 @@ export const APPS: AppConfig[] = [
     color: 'bg-amber-600', 
     externalUrl: 'https://quaderni-per-esercizi.vercel.app/index.html' 
   },
-   { 
-    id: 'esercizi', 
-    name: 'Cinese', 
-    icon: TowerControl, 
-    color: 'bg-indigo-500', 
-    externalUrl: 'https://esercizi-lingua-cinese.vercel.app/' 
-  },
   
   // Esempio per un file locale:
   // { id: 'agenda', name: 'Agenda', icon: Globe, color: 'bg-orange-500', externalUrl: '/agenda.html' },
