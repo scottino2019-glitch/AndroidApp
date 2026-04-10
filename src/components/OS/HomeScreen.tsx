@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Folder, FileText, Bot, Settings, Globe, Signature, CalendarHeart, NotebookPen, Languages, FileEdit, ListChecks, FileType2, BookOpenText, BookHeart,Type, PenTool  } from 'lucide-react';
+import { Folder, FileText, Bot, Settings, Globe, Signature, CalendarHeart, NotebookPen, Languages, FileEdit, ListChecks, FileType2, BookImage, BookHeart,Type, PenTool  } from 'lucide-react';
 import { useOS } from '../../OSContext';
 import { AppConfig } from '../../types';
 import { APP_COLORS } from '../../lib/utils';
@@ -85,7 +85,7 @@ export const APPS: AppConfig[] = [
   { 
     id: 'eserciziario', 
     name: 'Eserciziario', 
-    icon: BookOpenText, 
+    icon: BookImage, 
     color: 'bg-emerald-600', 
     externalUrl: 'eserciziario.html' 
   },
