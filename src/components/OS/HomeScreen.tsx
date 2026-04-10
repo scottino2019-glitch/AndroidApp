@@ -57,7 +57,7 @@ export const APPS: AppConfig[] = [
   { 
     id: 'esercizi-cinese', 
     name: 'Cinese', 
-    icon: Languages, // NO VIRGOLETTE
+    icon: Globe,
     color: 'bg-red-600', 
     externalUrl: 'https://esercizi-lingua-cinese.vercel.app/' 
   },
