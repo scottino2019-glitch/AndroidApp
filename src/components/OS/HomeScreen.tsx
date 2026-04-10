@@ -66,7 +66,7 @@ export const APPS: AppConfig[] = [
     name: 'PDF Notepad', 
     icon: FileEdit, // NO VIRGOLETTE
     color: 'bg-blue-400', 
-    externalUrl: '/ pdf-notepad.html' 
+    externalUrl: '/pdf-notepad.html' 
   },
   { 
     id: 'liste', 
@@ -109,7 +109,7 @@ export const APPS: AppConfig[] = [
     icon: PenTool, 
     color: 'bg-cyan-600', 
     externalUrl: '/scrivere-pdf.html' 
-  }
+  },
 
   // Esempio per un file locale:
   // { id: 'agenda', name: 'Agenda', icon: Globe, color: 'bg-orange-500', externalUrl: '/agenda.html' },
