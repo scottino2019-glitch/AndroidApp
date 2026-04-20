@@ -69,9 +69,9 @@ export const APPS: AppConfig[] = [
     externalUrl: '/pdf-notepad.html' 
   },
   { 
-    id: 'liste', 
-    name: 'Liste', 
-    icon: ListChecks, 
+    id: 'note', 
+    name: 'Note', 
+    icon: Notebook, 
     color: 'bg-slate-500', 
     externalUrl: '/liste.html' 
   },
