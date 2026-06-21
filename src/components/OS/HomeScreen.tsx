@@ -87,7 +87,7 @@ export const APPS: AppConfig[] = [
     name: 'Mini-ide', 
     icon: PenTool, 
     color: 'bg-emerald-600', 
-    externalUrl: '/eserciziario.html' 
+    externalUrl: 'https://mini-ide.vercel.app/' 
   },
   { 
     id: 'diario', 
