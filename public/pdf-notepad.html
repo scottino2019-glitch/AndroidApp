@@ -3,200 +3,224 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PDF Studio Safe Mode</title>
+    <title>PDF Studio Pro - HQ</title>
     <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- LIBRERIE LOCALI -->
     <script src="pdf.min.js"></script>
 
     <style>
-        body { margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; background: #1a1a1b; font-family: sans-serif; overflow: hidden; }
-        header { background: #2d2d2e; padding: 10px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #444; z-index: 10; }
+        body { margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; background: #202124; font-family: sans-serif; overflow: hidden; }
         
+        /* HEADER */
+        header { background: #1a1a1a; padding: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.5); z-index: 10; }
+        
+        /* PDF VIEWPORT */
         #pdf-viewport { 
             flex: 1; 
             overflow-y: auto; 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
-            background: #1a1a1b;
-            padding-top: 10px;
+            background: #3c4043;
+            padding: 5px 0;
         }
 
+        /* Il segreto per la nitidezza: canvas grande ma scalato via CSS */
         canvas { 
-            max-width: 98% !important; 
-            height: auto !important; 
-            margin-bottom: 15px; 
+            display: block;
+            width: 100% !important; /* Si adatta allo schermo */
+            height: auto !important;
+            margin-bottom: 10px; 
             background: white;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
 
+        /* EDITOR NOTE */
         #editor-container { 
-            height: 35vh; 
+            height: 40vh; 
             background: #fff; 
-            border-top: 3px solid #6366f1;
+            border-top: 4px solid #4F46E5;
             display: flex;
             flex-direction: column;
         }
 
-        #notepad { 
-            flex: 1; width: 100%; border: none; outline: none; padding: 12px;
-            font-size: 16px; resize: none; color: #111; line-height: 1.5;
+        /* Toolbar Editor */
+        .editor-toolbar {
+            background: #f8f9fa;
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
         }
 
-        .status-bar { background: #2d2d2e; color: #aaa; font-size: 9px; padding: 2px 10px; text-transform: uppercase; display: flex; justify-content: space-between; }
-        .btn { background: #6366f1; color: white; padding: 8px 15px; border-radius: 6px; font-size: 11px; font-weight: bold; border: none; }
-        .error-box { color: #ff4d4d; font-size: 10px; max-width: 150px; overflow: hidden; }
+        #notepad { 
+            flex: 1;
+            width: 100%;
+            border: none;
+            outline: none;
+            padding: 15px;
+            font-size: 16px;
+            line-height: 1.6;
+            resize: none;
+            color: #222;
+        }
+
+        .btn-blue { background: #4F46E5; color: white; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
+        .btn-red { background: #dc2626; color: white; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
+        .btn-green { background: #16a34a; color: white; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
     </style>
 </head>
 <body>
 
     <header>
-        <label class="btn cursor-pointer">
-            Carica PDF
+        <label class="btn-blue cursor-pointer">
+            Apri PDF
             <input type="file" id="file-input" accept="application/pdf" class="hidden">
         </label>
         <div class="flex flex-col items-end">
             <span id="page-indicator" class="text-white text-[10px] font-bold">PAGINA: 0 / 0</span>
-            <div id="error-log" class="error-box"></div>
+            <span id="status-msg" class="text-yellow-500 text-[9px] font-bold uppercase tracking-widest mt-1"></span>
         </div>
     </header>
 
+    <!-- Area PDF -->
     <div id="pdf-viewport">
-        <div id="msg" class="text-gray-500 mt-10 text-center text-sm">Nessun documento caricato</div>
+        <div id="welcome-msg" class="text-white opacity-40 mt-20 text-center">
+            <p>Carica un file per visualizzarlo in alta definizione</p>
+        </div>
     </div>
 
-    <div class="status-bar">
-        <span>Salvataggio note automatico</span>
-        <span id="render-status">Pronto</span>
-    </div>
-
+    <!-- Area Note -->
     <div id="editor-container">
-        <textarea id="notepad" placeholder="Scrivi qui i tuoi appunti..."></textarea>
+        <div class="editor-toolbar">
+            <span class="text-[10px] font-black text-gray-500 uppercase">I tuoi Appunti</span>
+            <div class="flex gap-2">
+                <button onclick="clearNotes()" class="btn-red">Svuota</button>
+                <button onclick="downloadNotes()" class="btn-green">Salva .TXT</button>
+            </div>
+        </div>
+        <textarea id="notepad" placeholder="Scrivi i tuoi appunti qui mentre leggi..."></textarea>
     </div>
 
     <script>
-        // Configurazione PDF.js Locale
+        // Setup PDF.js Locale
         const pdfjsLib = window['pdfjs-dist/build/pdf'];
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdf.worker.min.js';
 
         const fileInput = document.getElementById('file-input');
         const viewport = document.getElementById('pdf-viewport');
         const notepad = document.getElementById('notepad');
-        const renderStatus = document.getElementById('render-status');
-        const errorLog = document.getElementById('error-log');
+        const statusMsg = document.getElementById('status-msg');
+        const pageInd = document.getElementById('page-indicator');
 
+        // 1. CARICAMENTO E RENDERING PDF
         fileInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
 
             const reader = new FileReader();
-            renderStatus.textContent = "Lettura file...";
-            errorLog.textContent = "";
-
+            statusMsg.textContent = "Lettura...";
+            
             reader.onload = function() {
                 const data = new Uint8Array(this.result);
-                startPDFEngine(data);
+                renderHighQualityPDF(data);
             };
-            reader.onerror = (e) => alert("Errore lettura file: " + e);
             reader.readAsArrayBuffer(file);
         });
 
-        async function startPDFEngine(uint8Data) {
+        async function renderHighQualityPDF(data) {
             try {
                 viewport.innerHTML = '';
-                renderStatus.textContent = "Avvio motore...";
+                document.getElementById('welcome-msg').style.display = 'none';
 
-                // Parametri di caricamento ultra-sicuri per PDF scansionati
                 const loadingTask = pdfjsLib.getDocument({
-                    data: uint8Data,
-                    disableRange: true,      // Importante per file locali
-                    disableStream: true,     // Evita problemi di memoria nel buffer
-                    disableAutoFetch: true,  // Carica solo ciò che serve
-                    isEvalSupported: false   // Più sicuro per WebView
+                    data: data,
+                    disableRange: true,
+                    disableStream: true
                 });
 
                 const pdf = await loadingTask.promise;
-                document.getElementById('page-indicator').textContent = `PAGINA: 1 / ${pdf.numPages}`;
-                
-                // RENDERING SEQUENZIALE
-                for (let n = 1; n <= pdf.numPages; n++) {
-                    renderStatus.textContent = `Rendering Pag. ${n}...`;
-                    try {
-                        await renderOnePage(pdf, n);
-                    } catch (e) {
-                        console.error("Errore pagina " + n, e);
-                        const errDiv = document.createElement('div');
-                        errDiv.className = "text-red-500 p-10 text-xs";
-                        errDiv.textContent = `Impossibile caricare Pagina ${n}`;
-                        viewport.appendChild(errDiv);
-                    }
+                pageInd.textContent = `PAGINA: 1 / ${pdf.numPages}`;
+
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    statusMsg.textContent = `Rendering pag ${i}...`;
+                    await renderPage(pdf, i);
                 }
-                renderStatus.textContent = "Completato";
+                
+                statusMsg.textContent = "Pronto";
+                setTimeout(() => statusMsg.textContent = "", 2000);
 
             } catch (err) {
-                renderStatus.textContent = "Errore Critico";
-                errorLog.textContent = err.message;
-                alert("Errore PDF: " + err.message);
+                alert("Errore: " + err.message);
+                statusMsg.textContent = "Errore";
             }
         }
 
-        async function renderOnePage(pdf, num) {
+        async function renderPage(pdf, num) {
             const page = await pdf.getPage(num);
             
-            // LIMITA RISOLUZIONE PER PDF SCANSIONATI
-            // Se la scansione è enorme, la scaliamo forzatamente per salvare memoria
-            const rawViewport = page.getViewport({ scale: 1.0 });
-            
-            // Calcolo scale: cerchiamo di stare intorno ai 1000px di larghezza
-            let safeScale = 1.0;
-            if (rawViewport.width > 1000) {
-                safeScale = 1000 / rawViewport.width;
-            }
-            
-            // Su mobile, se la RAM è poca, meglio scalare ancora un po'
-            if (window.innerWidth < 600) safeScale *= 0.8;
-
-            const vp = page.getViewport({ scale: safeScale });
+            // SCALE 2.0 = Alta Nitidezza. 
+            // Se il telefono ha pochissima RAM e crasha, scendi a 1.5
+            const scale = 2.0; 
+            const vp = page.getViewport({ scale: scale });
             
             const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d', { 
-                alpha: false, 
-                willReadFrequently: false 
-            });
-
+            const context = canvas.getContext('2d', { alpha: false });
+            
             canvas.width = vp.width;
             canvas.height = vp.height;
+            
             viewport.appendChild(canvas);
 
             await page.render({
-                canvasContext: ctx,
-                viewport: vp,
-                intent: 'display' // Forza il rendering per visualizzazione
+                canvasContext: context,
+                viewport: vp
             }).promise;
             
-            // Aiutiamo il Garbage Collector
             page.cleanup();
         }
 
-        // --- GESTIONE NOTE ---
+        // 2. GESTIONE NOTE (Salva, Scarica, Svuota)
         window.onload = () => {
-            const saved = localStorage.getItem('_my_notes_save');
+            const saved = localStorage.getItem('_studio_notes_hq');
             if (saved) notepad.value = saved;
         };
 
+        // Salvataggio automatico durante la scrittura
         notepad.addEventListener('input', () => {
-            localStorage.setItem('_my_notes_save', notepad.value);
+            localStorage.setItem('_studio_notes_hq', notepad.value);
         });
 
-        // Tracker Pagina
+        function clearNotes() {
+            if (confirm("Vuoi cancellare tutte le note?")) {
+                notepad.value = '';
+                localStorage.removeItem('_studio_notes_hq');
+            }
+        }
+
+        function downloadNotes() {
+            const text = notepad.value;
+            if (!text) {
+                alert("Il notepad è vuoto!");
+                return;
+            }
+            const blob = new Blob([text], { type: 'text/plain' });
+            const link = document.createElement('a');
+            link.download = "appunti.txt";
+            link.href = window.URL.createObjectURL(blob);
+            link.click();
+        }
+
+        // Tracker pagine
         viewport.addEventListener('scroll', () => {
             const canvases = viewport.getElementsByTagName('canvas');
+            const scrollPos = viewport.scrollTop;
             for (let i = 0; i < canvases.length; i++) {
-                const rect = canvases[i].getBoundingClientRect();
-                if (rect.top > -100 && rect.top < 300) {
-                    const total = document.getElementById('page-indicator').textContent.split('/')[1];
-                    document.getElementById('page-indicator').textContent = `PAGINA: ${i + 1} / ${total}`;
+                if (canvases[i].offsetTop > scrollPos - 100) {
+                    const total = pageInd.textContent.split('/')[1];
+                    pageInd.textContent = `PAGINA: ${i + 1} / ${total}`;
                     break;
                 }
             }
