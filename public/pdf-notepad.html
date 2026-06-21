@@ -3,16 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PDF Reader & Note - Pro</title>
+    <title>PDF Studio Safe Mode</title>
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- CARICAMENTO LOCALE -->
+    <!-- LIBRERIE LOCALI -->
     <script src="pdf.min.js"></script>
 
     <style>
-        body { margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; background: #202124; font-family: sans-serif; }
-        
-        header { background: #1a1a1a; padding: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.5); z-index: 10; }
+        body { margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; background: #1a1a1b; font-family: sans-serif; overflow: hidden; }
+        header { background: #2d2d2e; padding: 10px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #444; z-index: 10; }
         
         #pdf-viewport { 
             flex: 1; 
@@ -20,186 +19,184 @@
             display: flex; 
             flex-direction: column; 
             align-items: center; 
-            padding: 5px 0;
-            background: #3c4043;
-            scroll-behavior: smooth;
+            background: #1a1a1b;
+            padding-top: 10px;
         }
 
-        /* Ottimizzazione Canvas per PDF scansionati */
         canvas { 
-            display: block;
-            max-width: 100%; 
+            max-width: 98% !important; 
             height: auto !important; 
-            margin-bottom: 8px; 
+            margin-bottom: 15px; 
             background: white;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
         }
 
         #editor-container { 
             height: 35vh; 
             background: #fff; 
-            border-top: 4px solid #4F46E5;
+            border-top: 3px solid #6366f1;
             display: flex;
             flex-direction: column;
-            padding: 10px;
         }
 
         #notepad { 
-            flex: 1;
-            width: 100%;
-            border: none;
-            outline: none;
-            font-size: 16px;
-            line-height: 1.5;
-            resize: none;
-            background: transparent;
-            color: #202124;
+            flex: 1; width: 100%; border: none; outline: none; padding: 12px;
+            font-size: 16px; resize: none; color: #111; line-height: 1.5;
         }
 
-        .btn-action { background: #4F46E5; color: white; padding: 10px 16px; border-radius: 8px; font-size: 12px; font-weight: bold; text-transform: uppercase; border: none; }
-        .page-badge { background: #333; color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 10px; }
+        .status-bar { background: #2d2d2e; color: #aaa; font-size: 9px; padding: 2px 10px; text-transform: uppercase; display: flex; justify-content: space-between; }
+        .btn { background: #6366f1; color: white; padding: 8px 15px; border-radius: 6px; font-size: 11px; font-weight: bold; border: none; }
+        .error-box { color: #ff4d4d; font-size: 10px; max-width: 150px; overflow: hidden; }
     </style>
 </head>
 <body>
 
     <header>
-        <label class="btn-action cursor-pointer">
-            Apri PDF
+        <label class="btn cursor-pointer">
+            Carica PDF
             <input type="file" id="file-input" accept="application/pdf" class="hidden">
         </label>
         <div class="flex flex-col items-end">
-            <div id="page-info" class="page-badge">
-                PAG: <span id="current-page">0</span> / <span id="total-pages">0</span>
-            </div>
-            <span id="loading-msg" class="text-[9px] text-yellow-500 font-bold mt-1 uppercase"></span>
+            <span id="page-indicator" class="text-white text-[10px] font-bold">PAGINA: 0 / 0</span>
+            <div id="error-log" class="error-box"></div>
         </div>
     </header>
 
     <div id="pdf-viewport">
-        <div id="empty-state" class="text-white opacity-40 mt-20 text-center">
-            <p>Seleziona un PDF (anche scansionato)</p>
-        </div>
+        <div id="msg" class="text-gray-500 mt-10 text-center text-sm">Nessun documento caricato</div>
+    </div>
+
+    <div class="status-bar">
+        <span>Salvataggio note automatico</span>
+        <span id="render-status">Pronto</span>
     </div>
 
     <div id="editor-container">
-        <div class="flex justify-between items-center mb-1">
-            <span class="text-[10px] font-black text-indigo-600 uppercase tracking-tighter">I tuoi Appunti</span>
-            <button onclick="clearNotes()" class="text-[10px] text-red-500 font-bold uppercase">Svuota</button>
-        </div>
-        <textarea id="notepad" placeholder="Scrivi qui..."></textarea>
+        <textarea id="notepad" placeholder="Scrivi qui i tuoi appunti..."></textarea>
     </div>
 
     <script>
-        // CONFIGURAZIONE LOCALE
+        // Configurazione PDF.js Locale
         const pdfjsLib = window['pdfjs-dist/build/pdf'];
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdf.worker.min.js';
 
         const fileInput = document.getElementById('file-input');
         const viewport = document.getElementById('pdf-viewport');
         const notepad = document.getElementById('notepad');
-        const loadingMsg = document.getElementById('loading-msg');
+        const renderStatus = document.getElementById('render-status');
+        const errorLog = document.getElementById('error-log');
 
         fileInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
 
             const reader = new FileReader();
-            loadingMsg.textContent = "Lettura file...";
-            
+            renderStatus.textContent = "Lettura file...";
+            errorLog.textContent = "";
+
             reader.onload = function() {
                 const data = new Uint8Array(this.result);
-                renderPDF(data);
+                startPDFEngine(data);
             };
+            reader.onerror = (e) => alert("Errore lettura file: " + e);
             reader.readAsArrayBuffer(file);
         });
 
-        async function renderPDF(data) {
+        async function startPDFEngine(uint8Data) {
             try {
                 viewport.innerHTML = '';
-                document.getElementById('empty-state').style.display = 'none';
-                loadingMsg.textContent = "Inizializzazione...";
+                renderStatus.textContent = "Avvio motore...";
 
+                // Parametri di caricamento ultra-sicuri per PDF scansionati
                 const loadingTask = pdfjsLib.getDocument({
-                    data: data,
-                    // Parametri per gestire PDF scansionati pesanti
-                    disableFontFace: false,
-                    verbosity: 0
+                    data: uint8Data,
+                    disableRange: true,      // Importante per file locali
+                    disableStream: true,     // Evita problemi di memoria nel buffer
+                    disableAutoFetch: true,  // Carica solo ciò che serve
+                    isEvalSupported: false   // Più sicuro per WebView
                 });
 
                 const pdf = await loadingTask.promise;
-                document.getElementById('total-pages').textContent = pdf.numPages;
-
-                // Renderizziamo le pagine una alla volta
-                for (let i = 1; i <= pdf.numPages; i++) {
-                    loadingMsg.textContent = `Caricamento pag ${i}...`;
-                    await renderPage(pdf, i);
-                }
+                document.getElementById('page-indicator').textContent = `PAGINA: 1 / ${pdf.numPages}`;
                 
-                loadingMsg.textContent = "Completato";
-                setTimeout(() => loadingMsg.textContent = "", 2000);
+                // RENDERING SEQUENZIALE
+                for (let n = 1; n <= pdf.numPages; n++) {
+                    renderStatus.textContent = `Rendering Pag. ${n}...`;
+                    try {
+                        await renderOnePage(pdf, n);
+                    } catch (e) {
+                        console.error("Errore pagina " + n, e);
+                        const errDiv = document.createElement('div');
+                        errDiv.className = "text-red-500 p-10 text-xs";
+                        errDiv.textContent = `Impossibile caricare Pagina ${n}`;
+                        viewport.appendChild(errDiv);
+                    }
+                }
+                renderStatus.textContent = "Completato";
 
             } catch (err) {
-                loadingMsg.textContent = "Errore!";
-                alert("Impossibile caricare il PDF: " + err.message);
+                renderStatus.textContent = "Errore Critico";
+                errorLog.textContent = err.message;
+                alert("Errore PDF: " + err.message);
             }
         }
 
-        async function renderPage(pdf, pageNum) {
-            const page = await pdf.getPage(pageNum);
+        async function renderOnePage(pdf, num) {
+            const page = await pdf.getPage(num);
             
-            // CALCOLO DELLO SCALE OTTIMIZZATO
-            // Prendiamo la larghezza dello schermo per adattare il PDF
-            const viewportWidth = window.innerWidth;
-            const originalViewport = page.getViewport({ scale: 1 });
+            // LIMITA RISOLUZIONE PER PDF SCANSIONATI
+            // Se la scansione è enorme, la scaliamo forzatamente per salvare memoria
+            const rawViewport = page.getViewport({ scale: 1.0 });
             
-            // Calcoliamo lo scale ideale basato sulla larghezza dello schermo (max 1.5 per non saturare la RAM)
-            let idealScale = (viewportWidth / originalViewport.width) * 0.95;
-            if (idealScale > 1.5) idealScale = 1.5; 
+            // Calcolo scale: cerchiamo di stare intorno ai 1000px di larghezza
+            let safeScale = 1.0;
+            if (rawViewport.width > 1000) {
+                safeScale = 1000 / rawViewport.width;
+            }
+            
+            // Su mobile, se la RAM è poca, meglio scalare ancora un po'
+            if (window.innerWidth < 600) safeScale *= 0.8;
 
-            const lp = page.getViewport({ scale: idealScale });
+            const vp = page.getViewport({ scale: safeScale });
             
             const canvas = document.createElement('canvas');
-            const context = canvas.getContext('2d', { alpha: false }); // alpha false velocizza il rendering
-            
-            canvas.width = lp.width;
-            canvas.height = lp.height;
-            
-            const renderContext = {
-                canvasContext: context,
-                viewport: lp
-            };
-            
+            const ctx = canvas.getContext('2d', { 
+                alpha: false, 
+                willReadFrequently: false 
+            });
+
+            canvas.width = vp.width;
+            canvas.height = vp.height;
             viewport.appendChild(canvas);
 
-            // IMPORTANTE: Aspettiamo che il rendering della pagina finisca prima di passare alla successiva
-            // Questo evita il crash della memoria su Android
-            await page.render(renderContext).promise;
+            await page.render({
+                canvasContext: ctx,
+                viewport: vp,
+                intent: 'display' // Forza il rendering per visualizzazione
+            }).promise;
+            
+            // Aiutiamo il Garbage Collector
+            page.cleanup();
         }
 
-        // GESTIONE NOTE
+        // --- GESTIONE NOTE ---
         window.onload = () => {
-            const stored = localStorage.getItem('appunti_pdf_v2');
-            if (stored) notepad.value = stored;
+            const saved = localStorage.getItem('_my_notes_save');
+            if (saved) notepad.value = saved;
         };
 
         notepad.addEventListener('input', () => {
-            localStorage.setItem('appunti_pdf_v2', notepad.value);
+            localStorage.setItem('_my_notes_save', notepad.value);
         });
 
-        function clearNotes() {
-            if (confirm("Cancellare tutti gli appunti?")) {
-                notepad.value = '';
-                localStorage.removeItem('appunti_pdf_v2');
-            }
-        }
-
-        // Tracker pagina durante lo scroll
+        // Tracker Pagina
         viewport.addEventListener('scroll', () => {
-            const scrollPos = viewport.scrollTop;
             const canvases = viewport.getElementsByTagName('canvas');
             for (let i = 0; i < canvases.length; i++) {
-                if (canvases[i].offsetTop > scrollPos - 100) {
-                    document.getElementById('current-page').textContent = i + 1;
+                const rect = canvases[i].getBoundingClientRect();
+                if (rect.top > -100 && rect.top < 300) {
+                    const total = document.getElementById('page-indicator').textContent.split('/')[1];
+                    document.getElementById('page-indicator').textContent = `PAGINA: ${i + 1} / ${total}`;
                     break;
                 }
             }
