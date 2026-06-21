@@ -98,7 +98,7 @@ export const APPS: AppConfig[] = [
   },
   { 
     id: 'traduttore', 
-    name: 'Traduttore PDF', 
+    name: 'Traduttore', 
     icon: Type, 
     color: 'bg-indigo-600', 
     externalUrl: '/traduttore.html' 
