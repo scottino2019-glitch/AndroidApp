@@ -78,14 +78,14 @@ export const APPS: AppConfig[] = [
   { 
     id: 'esercizi-coreano', 
     name: 'Coreano', 
-    icon: Lenguage, 
+    icon: Languages, 
     color: 'bg-orange-600', 
     externalUrl: 'https://esercizi-lingua-coreana.netlify.app/' 
   },
   { 
     id: 'editor-html', 
     name: 'Mini-ide', 
-    icon: Pentool, 
+    icon: PenTool, 
     color: 'bg-emerald-600', 
     externalUrl: '/eserciziario.html' 
   },
