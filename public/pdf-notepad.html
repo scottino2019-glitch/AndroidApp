@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PDF Studio Ultra-Fix</title>
+    <title>PDF Studio Ultra-Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="pdf.min.js"></script>
     <style>
@@ -18,10 +18,10 @@
         
         #notepad { flex: 1; width: 100%; border: none; outline: none; padding: 15px; font-size: 16px; resize: none; color: #111; line-height: 1.5; }
 
-        .btn { padding: 8px 12px; border-radius: 6px; font-size: 10px; font-weight: bold; border: none; color: white; text-transform: uppercase; }
+        .btn { padding: 10px 14px; border-radius: 8px; font-size: 10px; font-weight: bold; border: none; color: white; text-transform: uppercase; }
         .btn-blue { background: #4f46e5; }
         .btn-red { background: #ef4444; }
-        .btn-green { background: #22c55e; }
+        .btn-green { background: #16a34a; }
         .btn-orange { background: #f59e0b; }
         #render-msg { color: #fbbf24; font-size: 9px; font-weight: bold; }
     </style>
@@ -40,20 +40,19 @@
     </header>
 
     <div id="pdf-viewport">
-        <div class="text-gray-600 mt-20 text-center text-sm italic">Carica un documento...</div>
+        <div class="text-gray-600 mt-20 text-center text-sm italic px-4">Carica un documento per iniziare lo studio</div>
     </div>
 
     <div id="editor-container">
         <div class="toolbar">
-            <div class="flex gap-1">
-                <!-- Tasto Svuota con doppia conferma interna -->
+            <div class="flex gap-2">
                 <button id="btn-clear" onclick="handleClear()" class="btn btn-red">Svuota</button>
             </div>
-            <div class="flex gap-1">
-                <!-- Tasto Copia (molto più sicuro in Android) -->
+            <div class="flex gap-2">
+                <!-- Tasto Copia come emergenza -->
                 <button onclick="copyNotes()" class="btn btn-orange">Copia</button>
-                <!-- Tasto Scarica -->
-                <button onclick="downloadNotes()" class="btn btn-green">Scarica</button>
+                <!-- Tasto Salva/Condividi: il più potente su Android -->
+                <button onclick="shareOrDownload()" class="btn btn-green italic">Salva / Condividi</button>
             </div>
         </div>
         <textarea id="notepad" placeholder="Scrivi qui i tuoi appunti..."></textarea>
@@ -69,7 +68,7 @@
         const renderMsg = document.getElementById('render-msg');
         const pageInd = document.getElementById('page-indicator');
 
-        // --- GESTIONE PDF ---
+        // GESTIONE PDF
         fileInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
@@ -84,7 +83,7 @@
                 const pdf = await pdfjsLib.getDocument({data: data, disableRange: true, disableStream: true}).promise;
                 pageInd.textContent = `PAGINA: 1 / ${pdf.numPages}`;
                 for (let n = 1; n <= pdf.numPages; n++) {
-                    renderMsg.textContent = `Caricamento ${n}...`;
+                    renderMsg.textContent = `PAG ${n}...`;
                     await renderPage(pdf, n);
                 }
                 renderMsg.textContent = "OK";
@@ -95,7 +94,7 @@
             const page = await pdf.getPage(num);
             const rawVp = page.getViewport({ scale: 1.0 });
             let scale = 1.6;
-            if (rawVp.width > 1500) scale = 1.0;
+            if (rawVp.width > 1500) scale = 1.1; // Protezione scansioni
             const vp = page.getViewport({ scale: scale });
             const canvas = document.createElement('canvas');
             canvas.width = vp.width; canvas.height = vp.height;
@@ -104,69 +103,78 @@
             page.cleanup();
         }
 
-        // --- GESTIONE NOTE ---
+        // GESTIONE NOTE
         window.onload = () => {
-            const saved = localStorage.getItem('_notes_v4');
+            const saved = localStorage.getItem('_notes_v5');
             if (saved) notepad.value = saved;
         };
 
         notepad.addEventListener('input', () => {
-            localStorage.setItem('_notes_v4', notepad.value);
+            localStorage.setItem('_notes_v5', notepad.value);
         });
 
-        // SVUOTA (Senza confirm di sistema)
+        // SVUOTA
         let clearStage = 0;
         function handleClear() {
             const btn = document.getElementById('btn-clear');
             if (clearStage === 0) {
                 btn.textContent = "SICURO?";
-                btn.classList.replace('btn-red', 'btn-orange');
                 clearStage = 1;
-                setTimeout(() => {
-                    btn.textContent = "Svuota";
-                    btn.classList.replace('btn-orange', 'btn-red');
-                    clearStage = 0;
-                }, 3000);
+                setTimeout(() => { btn.textContent = "Svuota"; clearStage = 0; }, 3000);
             } else {
                 notepad.value = '';
-                localStorage.removeItem('_notes_v4');
+                localStorage.removeItem('_notes_v5');
                 btn.textContent = "Svuota";
-                btn.classList.replace('btn-orange', 'btn-red');
                 clearStage = 0;
             }
         }
 
-        // COPIA (Funziona sempre su Android)
+        // COPIA
         function copyNotes() {
             notepad.select();
-            notepad.setSelectionRange(0, 99999); // Per mobile
+            notepad.setSelectionRange(0, 99999);
             try {
                 document.execCommand('copy');
-                alert("Appunti copiati negli appunti!");
-            } catch (err) {
-                alert("Impossibile copiare.");
+                alert("Copiato negli appunti!");
+            } catch (err) { alert("Errore copia."); }
+        }
+
+        // SALVA / CONDIVIDI (La soluzione per Android)
+        async function shareOrDownload() {
+            const text = notepad.value;
+            if (!text) { alert("Note vuote!"); return; }
+
+            // Se il browser supporta la condivisione (Android moderno)
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: 'I miei appunti',
+                        text: text
+                    });
+                } catch (err) {
+                    // Se l'utente annulla o dà errore, proviamo il download classico
+                    fallbackDownload(text);
+                }
+            } else {
+                fallbackDownload(text);
             }
         }
 
-        // SCARICA (Metodo alternativo)
-        function downloadNotes() {
-            const text = notepad.value;
-            if (!text) return;
+        function fallbackDownload(text) {
             const blob = new Blob([text], { type: 'text/plain' });
             const reader = new FileReader();
             reader.onload = function(e) {
                 const link = document.createElement('a');
                 link.href = e.target.result;
                 link.download = "appunti.txt";
-                link.style.display = 'none';
                 document.body.appendChild(link);
                 link.click();
-                setTimeout(() => document.body.removeChild(link), 100);
+                document.body.removeChild(link);
             };
             reader.readAsDataURL(blob);
         }
 
-        // Tracker pagine
+        // TRACKER PAGINE
         viewport.addEventListener('scroll', () => {
             const canvases = viewport.getElementsByTagName('canvas');
             for (let i = 0; i < canvases.length; i++) {
