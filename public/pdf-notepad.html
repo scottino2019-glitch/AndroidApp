@@ -92,9 +92,9 @@
 
         async function renderPage(pdf, num) {
             const page = await pdf.getPage(num);
-            const rawVp = page.getViewport({ scale: 1.0 });
-            let scale = 1.6;
-            if (rawVp.width > 1500) scale = 1.1; // Protezione scansioni
+            const rawVp = page.getViewport({ scale: 2.0 });
+            let scale = 1.8;
+            if (rawVp.width > 1500) scale = 2.1; // Protezione scansioni
             const vp = page.getViewport({ scale: scale });
             const canvas = document.createElement('canvas');
             canvas.width = vp.width; canvas.height = vp.height;
