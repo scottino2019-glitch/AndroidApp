@@ -101,7 +101,7 @@ export const APPS: AppConfig[] = [
     name: 'Traduttore PDF', 
     icon: Type, 
     color: 'bg-indigo-600', 
-    externalUrl: '/traduttore+pdf.html' 
+    externalUrl: '/traduttore.html' 
   },
   { 
     id: 'scrivere-pdf', 
