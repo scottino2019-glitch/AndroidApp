@@ -97,7 +97,7 @@ export const APPS: AppConfig[] = [
     externalUrl: 'https://diario-personale-alpha.vercel.app/' 
   },
   { 
-    id: 'traduttore-pdf', 
+    id: 'traduttore', 
     name: 'Traduttore PDF', 
     icon: Type, 
     color: 'bg-indigo-600', 
