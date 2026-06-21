@@ -70,22 +70,22 @@ export const APPS: AppConfig[] = [
   },
   { 
     id: 'sticky', 
-    name: 'Note', 
+    name: 'Sticky', 
     icon: NotebookPen, 
     color: 'bg-slate-500', 
     externalUrl: '/liste.html' 
   },
   { 
-    id: 'pdf-editor', 
-    name: 'PDF Editor', 
-    icon: FileType2, 
+    id: 'esercizi-coreano', 
+    name: 'Coreano', 
+    icon: Lenguage, 
     color: 'bg-orange-600', 
-    externalUrl: '/pdf-editor.html' 
+    externalUrl: 'https://esercizi-lingua-coreana.netlify.app/' 
   },
   { 
-    id: 'eserciziario', 
-    name: 'Eserciziario', 
-    icon: BookImage, 
+    id: 'editor-html', 
+    name: 'Mini-ide', 
+    icon: Pentool, 
     color: 'bg-emerald-600', 
     externalUrl: '/eserciziario.html' 
   },
