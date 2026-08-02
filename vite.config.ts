@@ -24,7 +24,7 @@ export default defineConfig(({ mode }) => {
         manifest: {
           id: '/',
           name: 'Android App',
-          short_name: 'AndroidApp',
+          short_name: 'DroidWeb',
           description: 'Ambiente stile android per raccogliere le proprie app',
           theme_color: '#ffffff',
           background_color: '#ffffff',
