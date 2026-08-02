@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PDF Studio Ultra-Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="pdf.min.js"></script>
+    <style>
+        body { margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; background: #1a1a1a; font-family: sans-serif; overflow: hidden; }
+        header { background: #2d2d2e; padding: 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #444; z-index: 10; }
+        
+        #pdf-viewport { flex: 1; overflow-y: auto; display: flex; flex-direction: column; align-items: center; background: #1a1a1b; padding-top: 10px; }
+        canvas { max-width: 98% !important; height: auto !important; margin-bottom: 15px; background: white; box-shadow: 0 4px 12px rgba(0,0,0,0.6); }
+
+        #editor-container { height: 38vh; background: #fff; border-top: 3px solid #6366f1; display: flex; flex-direction: column; }
+        .toolbar { background: #f1f5f9; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ddd; }
+        
+        #notepad { flex: 1; width: 100%; border: none; outline: none; padding: 15px; font-size: 16px; resize: none; color: #111; line-height: 1.5; }
+
+        .btn { padding: 10px 14px; border-radius: 8px; font-size: 10px; font-weight: bold; border: none; color: white; text-transform: uppercase; }
+        .btn-blue { background: #4f46e5; }
+        .btn-red { background: #ef4444; }
+        .btn-green { background: #16a34a; }
+        .btn-orange { background: #f59e0b; }
+        #render-msg { color: #fbbf24; font-size: 9px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <label class="btn btn-blue cursor-pointer">
+            Apri PDF
+            <input type="file" id="file-input" accept="application/pdf" class="hidden">
+        </label>
+        <div class="flex flex-col items-end">
+            <span id="page-indicator" class="text-white text-[10px] font-bold uppercase">Pagina: 0 / 0</span>
+            <span id="render-msg"></span>
+        </div>
+    </header>
+
+    <div id="pdf-viewport">
+        <div class="text-gray-600 mt-20 text-center text-sm italic px-4">Carica un documento per iniziare lo studio</div>
+    </div>
+
+    <div id="editor-container">
+        <div class="toolbar">
+            <div class="flex gap-2">
+                <button id="btn-clear" onclick="handleClear()" class="btn btn-red">Svuota</button>
+            </div>
+            <div class="flex gap-2">
+                <!-- Tasto Copia come emergenza -->
+                <button onclick="copyNotes()" class="btn btn-orange">Copia</button>
+                <!-- Tasto Salva/Condividi: il più potente su Android -->
+                <button onclick="shareOrDownload()" class="btn btn-green italic">Salva / Condividi</button>
+            </div>
+        </div>
+        <textarea id="notepad" placeholder="Scrivi qui i tuoi appunti..."></textarea>
+    </div>
+
+    <script>
+        const pdfjsLib = window['pdfjs-dist/build/pdf'];
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdf.worker.min.js';
+
+        const fileInput = document.getElementById('file-input');
+        const viewport = document.getElementById('pdf-viewport');
+        const notepad = document.getElementById('notepad');
+        const renderMsg = document.getElementById('render-msg');
+        const pageInd = document.getElementById('page-indicator');
+
+        // GESTIONE PDF
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function() { loadPDF(new Uint8Array(this.result)); };
+            reader.readAsArrayBuffer(file);
+        });
+
+        async function loadPDF(data) {
+            try {
+                viewport.innerHTML = '';
+                const pdf = await pdfjsLib.getDocument({data: data, disableRange: true, disableStream: true}).promise;
+                pageInd.textContent = `PAGINA: 1 / ${pdf.numPages}`;
+                for (let n = 1; n <= pdf.numPages; n++) {
+                    renderMsg.textContent = `PAG ${n}...`;
+                    await renderPage(pdf, n);
+                }
+                renderMsg.textContent = "OK";
+            } catch (err) { alert("Errore PDF: " + err.message); }
+        }
+
+        async function renderPage(pdf, num) {
+            const page = await pdf.getPage(num);
+            const rawVp = page.getViewport({ scale: 2.0 });
+            let scale = 2.0;
+            if (rawVp.width > 1500) scale = 2.1; // Protezione scansioni
+            const vp = page.getViewport({ scale: scale });
+            const canvas = document.createElement('canvas');
+            canvas.width = vp.width; canvas.height = vp.height;
+            viewport.appendChild(canvas);
+            await page.render({canvasContext: canvas.getContext('2d', {alpha:false}), viewport: vp}).promise;
+            page.cleanup();
+        }
+
+        // GESTIONE NOTE
+        window.onload = () => {
+            const saved = localStorage.getItem('_notes_v5');
+            if (saved) notepad.value = saved;
+        };
+
+        notepad.addEventListener('input', () => {
+            localStorage.setItem('_notes_v5', notepad.value);
+        });
+
+        // SVUOTA
+        let clearStage = 0;
+        function handleClear() {
+            const btn = document.getElementById('btn-clear');
+            if (clearStage === 0) {
+                btn.textContent = "SICURO?";
+                clearStage = 1;
+                setTimeout(() => { btn.textContent = "Svuota"; clearStage = 0; }, 3000);
+            } else {
+                notepad.value = '';
+                localStorage.removeItem('_notes_v5');
+                btn.textContent = "Svuota";
+                clearStage = 0;
+            }
+        }
+
+        // COPIA
+        function copyNotes() {
+            notepad.select();
+            notepad.setSelectionRange(0, 99999);
+            try {
+                document.execCommand('copy');
+                alert("Copiato negli appunti!");
+            } catch (err) { alert("Errore copia."); }
+        }
+
+        // SALVA / CONDIVIDI (La soluzione per Android)
+        async function shareOrDownload() {
+            const text = notepad.value;
+            if (!text) { alert("Note vuote!"); return; }
+
+            // Se il browser supporta la condivisione (Android moderno)
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: 'I miei appunti',
+                        text: text
+                    });
+                } catch (err) {
+                    // Se l'utente annulla o dà errore, proviamo il download classico
+                    fallbackDownload(text);
+                }
+            } else {
+                fallbackDownload(text);
+            }
+        }
+
+        function fallbackDownload(text) {
+            const blob = new Blob([text], { type: 'text/plain' });
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const link = document.createElement('a');
+                link.href = e.target.result;
+                link.download = "appunti.txt";
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            };
+            reader.readAsDataURL(blob);
+        }
+
+        // TRACKER PAGINE
+        viewport.addEventListener('scroll', () => {
+            const canvases = viewport.getElementsByTagName('canvas');
+            for (let i = 0; i < canvases.length; i++) {
+                const rect = canvases[i].getBoundingClientRect();
+                if (rect.top > -100 && rect.top < 400) {
+                    const total = pageInd.textContent.split('/')[1];
+                    pageInd.textContent = `PAGINA: ${i + 1} / ${total}`;
+                    break;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
