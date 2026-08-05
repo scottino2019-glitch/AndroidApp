@@ -1,187 +1,624 @@
 <!doctype html>
-<html lang="it"><head><script>window["__codeletBootstrap__"]=JSON.parse('{"A":"A","B":"20260710-05-9ed98a3"}');</script><script src="/_sdk/f432b76fb310b513.telemetry_sdk.js" integrity="sha512-9FJQ55EKmmqhyyik8BhrMVfm0+iYYfb8uOlRsjtkxJMEI97qOVEI4PnHohDjQAtvAep0IOEpdQ64eki0sz62ug=="></script>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Lavagna di Sughero</title>
-  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&amp;family=Kalam:wght@400;700&amp;display=swap" rel="stylesheet">
+  
+  <!-- Google Fonts for handwriting and dynamic styles -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Dancing+Script:wght@400..700&family=Indie+Flower&family=Kalam:wght@300;400;700&family=Patrick+Hand&family=Permanent+Marker&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
   <style>
-        body {
-            background-color: #bc8f8f;
-            background-image: 
-                radial-gradient(circle at 2px 2px, #a0522d 1px, transparent 0),
-                radial-gradient(circle at 5px 10px, #8b4513 1px, transparent 0);
-            background-size: 20px 20px, 30px 30px;
-            min-height: calc(100 * min(var(--vh, 1vh), 1vh));
-            margin: 0;
-            font-family: 'Kalam', cursive;
-        }
-        .cork-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: url('https://www.transparenttextures.com/patterns/cork-board.png');
-            pointer-events: none;
-            opacity: 0.4;
-            z-index: 1;
-        }
-        #board {
-            position: relative;
-            z-index: 2;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 24px;
-            padding: 32px;
-            align-content: flex-start;
-        }
-        .note {
-            width: 240px;
-            min-height: 220px;
-            padding: 28px 16px 16px 16px;
-            box-shadow: 5px 5px 15px rgba(0,0,0,0.3);
-            display: flex;
-            flex-direction: column;
-            clip-path: polygon(0% 0%, 100% 0%, 100% 95%, 95% 100%, 0% 100%);
-            position: relative;
-            transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
-        }
-        .note:hover { transform: scale(1.02); box-shadow: 8px 8px 20px rgba(0,0,0,0.35); z-index: 10; }
-        .pin {
-            position: absolute; top: 5px; left: 50%; transform: translateX(-50%);
-            width: 14px; height: 14px; border-radius: 50%;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.5), inset -2px -2px 3px rgba(0,0,0,0.3);
-        }
-        .note-header {
-            display: flex; justify-content: space-between; margin-bottom: 6px;
-            opacity: 0.3; transition: opacity 0.2s;
-        }
-        .note:hover .note-header { opacity: 1; }
-        .note-content {
-            flex-grow: 1; background: transparent; border: none; outline: none; resize: none;
-            font-family: 'Kalam', cursive; font-size: 1.15rem; line-height: 1.4; color: #2d3436;
-        }
-        .delete-btn { cursor: pointer; color: #636e72; font-size: 1.2rem; line-height: 1; }
-        .delete-btn:hover { color: #d63031; }
-        .color-picker { display: flex; gap: 4px; }
-        .color-dot { width: 12px; height: 12px; border-radius: 50%; cursor: pointer; border: 1px solid rgba(0,0,0,0.1); }
-        #add-btn {
-            position: fixed; bottom: 32px; right: 32px; width: 64px; height: 64px;
-            border-radius: 50%; background-color: #d63031; color: white; font-size: 36px;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 6px 12px rgba(0,0,0,0.4); cursor: pointer; z-index: 2000;
-            transition: all 0.3s cubic-bezier(0.175,0.885,0.32,1.275); border: 4px solid #fff;
-        }
-        #add-btn:hover { transform: scale(1.1) rotate(90deg); background-color: #ff7675; }
-        .empty-state {
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%);
-            text-align: center; color: rgba(255,255,255,0.8); pointer-events: none;
-            font-family: 'Permanent Marker', cursive; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-    </style>
-  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js" type="text/javascript"></script>
-  <script src="/_sdk/0179d719c431a79e.data_sdk.js" type="text/javascript" integrity="sha512-OsRvJkI5GkC3MJQcgotQYotpzrMSX415GiKKgvYdxQEEkzD/fdchShO2FMSy0PJr/tiINMXOk5Vl2zAgg6bUiA=="></script>
-  <script src="/_sdk/9432170dbd2ae0df.resizing_sdk.js" type="text/javascript" integrity="sha512-FeT+58sb1f9ejWPWFjCbJvTT+SDwGV+ngrHUnlO7TWEOoqwOLj6p256kO3vOL7DIWl1cIgrobiof8v2bOigwPg=="></script>
- </head>
- <body data-template-id="__page-root" style="background: rgb(188, 143, 143);">
+    body {
+      background-color: #bc8f8f;
+      background-image: 
+        radial-gradient(circle at 2px 2px, #a0522d 1px, transparent 0),
+        radial-gradient(circle at 5px 10px, #8b4513 1px, transparent 0);
+      background-size: 20px 20px, 30px 30px;
+      min-height: 100vh;
+      margin: 0;
+      font-family: 'Kalam', cursive;
+      overflow-x: hidden;
+    }
+
+    .cork-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('https://www.transparenttextures.com/patterns/cork-board.png');
+      pointer-events: none;
+      opacity: 0.45;
+      z-index: 1;
+    }
+
+    #board {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 28px;
+      padding: 32px;
+      align-content: flex-start;
+      justify-content: center;
+    }
+
+    @media (min-width: 640px) {
+      #board {
+        justify-content: flex-start;
+      }
+    }
+
+    /* Note styling */
+    .note {
+      width: 260px;
+      min-height: 240px;
+      padding: 28px 16px 16px 16px;
+      box-shadow: 5px 5px 15px rgba(0,0,0,0.3);
+      display: flex;
+      flex-direction: column;
+      clip-path: polygon(0% 0%, 100% 0%, 100% 95%, 95% 100%, 0% 100%);
+      position: relative;
+      transition: transform 0.2s cubic-bezier(0.175,0.885,0.32,1.275), box-shadow 0.2s ease, opacity 0.2s ease;
+      user-select: none;
+    }
+
+    .note:hover {
+      transform: scale(1.03) translateY(-2px) !important;
+      box-shadow: 8px 12px 22px rgba(0,0,0,0.35);
+      z-index: 20;
+    }
+
+    .pin {
+      position: absolute;
+      top: 6px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.5), inset -2px -2px 3px rgba(0,0,0,0.3);
+      cursor: pointer;
+      z-index: 10;
+    }
+
+    .note-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+      opacity: 0.6;
+      transition: opacity 0.2s;
+    }
+
+    .note:hover .note-header, .note:focus-within .note-header {
+      opacity: 1;
+    }
+
+    .note-tools {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .tool-btn {
+      background: rgba(0,0,0,0.05);
+      border: none;
+      border-radius: 6px;
+      padding: 3px 6px;
+      font-size: 13px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, transform 0.15s;
+    }
+
+    .tool-btn:hover {
+      background: rgba(0,0,0,0.15);
+      transform: scale(1.1);
+    }
+
+    .note-content {
+      flex-grow: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      resize: none;
+      font-size: 1.15rem;
+      line-height: 1.45;
+      color: #2d3436;
+      width: 100%;
+    }
+
+    .delete-btn {
+      cursor: pointer;
+      color: #636e72;
+      font-size: 1.3rem;
+      line-height: 1;
+      font-weight: bold;
+      transition: color 0.15s;
+    }
+
+    .delete-btn:hover {
+      color: #d63031;
+    }
+
+    /* Popover panel */
+    .popover-panel {
+      position: absolute;
+      top: 38px;
+      left: 10px;
+      right: 10px;
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(8px);
+      padding: 10px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+      z-index: 50;
+      border: 1px solid rgba(0,0,0,0.1);
+      display: none;
+    }
+
+    .popover-panel.active {
+      display: block;
+      animation: popIn 0.15s cubic-bezier(0.175,0.885,0.32,1.275);
+    }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.95) translateY(-5px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .color-picker-grid {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .color-dot {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid rgba(0,0,0,0.15);
+      transition: transform 0.15s;
+    }
+
+    .color-dot:hover {
+      transform: scale(1.2);
+    }
+
+    .font-option-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 5px 8px;
+      border-radius: 6px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-size: 1rem;
+      color: #2d3436;
+      transition: background 0.15s;
+    }
+
+    .font-option-btn:hover {
+      background: #f1f2f6;
+    }
+
+    .sticker-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 4px;
+      max-height: 140px;
+      overflow-y: auto;
+    }
+
+    .sticker-btn {
+      font-size: 1.4rem;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 2px;
+      border-radius: 6px;
+      transition: transform 0.15s, background 0.15s;
+    }
+
+    .sticker-btn:hover {
+      transform: scale(1.3);
+      background: #ffeaa7;
+    }
+
+    .stickers-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-bottom: 6px;
+    }
+
+    .sticker-badge {
+      font-size: 1.3rem;
+      cursor: pointer;
+      transition: transform 0.15s;
+      display: inline-block;
+    }
+
+    .sticker-badge:hover {
+      transform: scale(1.3) rotate(8deg);
+      opacity: 0.7;
+    }
+
+    /* Floating Add Button */
+    #add-btn {
+      position: fixed;
+      bottom: 32px;
+      right: 32px;
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background-color: #d63031;
+      color: white;
+      font-size: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+      cursor: pointer;
+      z-index: 2000;
+      transition: all 0.3s cubic-bezier(0.175,0.885,0.32,1.275);
+      border: 4px solid #fff;
+    }
+
+    #add-btn:hover {
+      transform: scale(1.1) rotate(90deg);
+      background-color: #ff7675;
+    }
+
+    .empty-state {
+      position: fixed;
+      top: 45%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      color: rgba(255,255,255,0.92);
+      pointer-events: none;
+      font-family: 'Permanent Marker', cursive;
+      text-shadow: 2px 2px 6px rgba(0,0,0,0.5);
+      z-index: 2;
+      width: 90%;
+      max-width: 500px;
+    }
+  </style>
+</head>
+<body>
   <div class="cork-overlay"></div>
+
+  <!-- Header Banner -->
+  <header style="position: relative; z-index: 10; text-align: center; padding-top: 24px; padding-bottom: 8px;">
+    <h1 style="color: #ffffff; font-family: 'Permanent Marker', cursive; font-size: 2.5rem; margin: 0; text-shadow: 2px 3px 8px rgba(0,0,0,0.5);">
+      La Mia Bacheca
+    </h1>
+    <p style="color: #fde047; font-family: 'Kalam', cursive; font-size: 1.15rem; margin-top: 4px; text-shadow: 1px 1px 4px rgba(0,0,0,0.6);">
+      Aggiungi note adesive, personalizza i font ed incolla le tue emoji!
+    </p>
+  </header>
+
+  <!-- Empty State Message -->
   <div id="empty-msg" class="empty-state">
-   <h1 data-template-id="board-title" class="canva-text text-5xl mb-4" style="color: rgba(255, 255, 255, 0.9); font-weight: 400; font-style: normal; font-size: 32px;">La Mia Bacheca</h1>
-   <p data-template-id="board-subtitle" class="canva-text text-xl" style="color: rgba(255, 255, 255, 0.8); font-weight: 400; font-style: normal; font-size: 20px;">Aggiungi una nota con il bottone in basso!</p>
+    <h2 style="font-size: 2.2rem; margin-bottom: 8px;">La bacheca è vuota</h2>
+    <p style="font-size: 1.2rem; font-family: 'Kalam', cursive; text-shadow: 1px 1px 3px rgba(0,0,0,0.6);">
+      Premi il pulsante rosso <strong style="color: #ff7675; font-size: 1.5rem;">+</strong> in basso per creare la tua prima nota!
+    </p>
   </div>
-  <main id="board"></main><button id="add-btn" data-template-id="add-button" class="canva-button" title="Aggiungi una nota" style="background: rgb(214, 48, 49); color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 16px;">+</button>
-  <script src="/_sdk/719055fef2a85d14.editing_sdk.js" integrity="sha512-kFqrdGgIiTOsu307feB5Cy3JVP9IayftsmCIZ0csxYBGuBmJQPhyvcnmKR8F0fTW97h5s1gAvz3SumI8zJ6OxQ=="></script>
+
+  <!-- Main Board Container for Notes -->
+  <main id="board"></main>
+
+  <!-- Floating Add Button -->
+  <button id="add-btn" title="Aggiungi una nuova nota">+</button>
+
   <script>
-        const board = document.getElementById('board');
-        const addBtn = document.getElementById('add-btn');
-        const emptyMsg = document.getElementById('empty-msg');
+    const board = document.getElementById('board');
+    const addBtn = document.getElementById('add-btn');
+    const emptyMsg = document.getElementById('empty-msg');
 
-        let notes = JSON.parse(localStorage.getItem('corkboard_notes')) || [];
-        const colors = [
-            { bg: '#fff9c4', pin: '#e53935' },
-            { bg: '#c8e6c9', pin: '#1e88e5' },
-            { bg: '#bbdefb', pin: '#f4511e' },
-            { bg: '#f8bbd0', pin: '#43a047' },
-            { bg: '#e1bee7', pin: '#ffb300' }
-        ];
+    // Preset color palette with matching pins
+    const colors = [
+      { bg: '#fff9c4', pin: '#e53935', name: 'Giallo' },
+      { bg: '#c8e6c9', pin: '#1e88e5', name: 'Verde' },
+      { bg: '#bbdefb', pin: '#f4511e', name: 'Blu' },
+      { bg: '#f8bbd0', pin: '#43a047', name: 'Rosa' },
+      { bg: '#e1bee7', pin: '#ffb300', name: 'Viola' },
+      { bg: '#ffe0b2', pin: '#8e24aa', name: 'Arancio' }
+    ];
 
-        function init() {
-            updateEmpty();
-            notes.forEach(n => createNoteElement(n));
+    // Dynamic Handwriting Fonts
+    const fonts = [
+      { id: 'font-kalam', family: "'Kalam', cursive", name: 'Kalam' },
+      { id: 'font-marker', family: "'Permanent Marker', cursive", name: 'Marker' },
+      { id: 'font-caveat', family: "'Caveat', cursive", name: 'Caveat' },
+      { id: 'font-indie', family: "'Indie Flower', cursive", name: 'Indie Flower' },
+      { id: 'font-patrick', family: "'Patrick Hand', cursive", name: 'Patrick Hand' },
+      { id: 'font-dancing', family: "'Dancing Script', cursive", name: 'Dancing' }
+    ];
 
-            addBtn.addEventListener('click', () => {
-                const colorSet = colors[Math.floor(Math.random() * colors.length)];
-                const newNote = {
-                    id: Date.now(),
-                    text: '',
-                    color: colorSet.bg,
-                    pinColor: colorSet.pin
-                };
-                notes.push(newNote);
-                saveNotes();
-                createNoteElement(newNote);
-                updateEmpty();
-            });
+    // Emoji Stickers list
+    const emojiStickers = [
+      '⭐', '❤️', '📌', '🔥', '💡', '🎯', '🚀', '☕',
+      '🎉', '📝', '🌟', '⚡', '🍀', '🎨', '🏷️', '⏰',
+      '🍕', '🐱', '✈️', '🔑', '🏆', '☀️', '🌈', '🎁'
+    ];
+
+    let notes = [];
+
+    // Load saved notes from LocalStorage
+    try {
+      const saved = localStorage.getItem('corkboard_notes');
+      if (saved) {
+        notes = JSON.parse(saved);
+      }
+    } catch (e) {
+      console.error('Error reading localStorage', e);
+    }
+
+    // Default note if board is completely new
+    if (!notes || notes.length === 0) {
+      notes = [
+        {
+          id: Date.now(),
+          text: 'Benvenuto nella tua Lavagna di Sughero! 📌\n\n• Modifica questo testo\n• Clicca 🎨 per il colore\n• Clicca 🔤 per il font\n• Clicca 😊 per gli sticker!',
+          color: '#fff9c4',
+          pinColor: '#e53935',
+          fontFamily: "'Kalam', cursive",
+          stickers: ['⭐', '💡', '📌'],
+          rotation: -1.5
         }
+      ];
+      saveNotes();
+    }
 
-        function updateEmpty() {
-            emptyMsg.style.display = notes.length === 0 ? 'block' : 'none';
+    function init() {
+      renderAllNotes();
+
+      // Add note button listener
+      addBtn.addEventListener('click', () => {
+        const colorSet = colors[Math.floor(Math.random() * colors.length)];
+        const rot = Number((Math.random() * 5 - 2.5).toFixed(1));
+        const newNote = {
+          id: Date.now(),
+          text: '',
+          color: colorSet.bg,
+          pinColor: colorSet.pin,
+          fontFamily: "'Kalam', cursive",
+          stickers: [],
+          rotation: rot
+        };
+
+        notes.unshift(newNote);
+        saveNotes();
+        renderAllNotes();
+      });
+
+      // Close open popovers when clicking elsewhere
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.popover-panel') && !e.target.closest('.tool-btn')) {
+          closeAllPopovers();
         }
+      });
+    }
 
-        function createNoteElement(noteData) {
-            const noteEl = document.createElement('div');
-            noteEl.className = 'note';
-            noteEl.style.backgroundColor = noteData.color;
-            noteEl.dataset.id = noteData.id;
+    function updateEmptyState() {
+      emptyMsg.style.display = notes.length === 0 ? 'block' : 'none';
+    }
 
-            noteEl.innerHTML = `
-                <div class="pin" style="background-color: ${noteData.pinColor}"></div>
-                <div class="note-header">
-                    <div class="color-picker">
-                        ${colors.map(c => `<div class="color-dot" style="background-color: ${c.bg}" data-color="${c.bg}" data-pin="${c.pin}"></div>`).join('')}
-                    </div>
-                    <span class="delete-btn" title="Rimuovi">&times;</span>
-                </div>
-                <textarea class="note-content" placeholder="Scrivi una nota...">${noteData.text}</textarea>
-            `;
+    function closeAllPopovers() {
+      document.querySelectorAll('.popover-panel').forEach(p => p.classList.remove('active'));
+    }
 
-            const textarea = noteEl.querySelector('.note-content');
-            textarea.addEventListener('input', (e) => {
-                const idx = notes.findIndex(n => n.id == noteData.id);
-                if (idx !== -1) { notes[idx].text = e.target.value; saveNotes(); }
-            });
+    function saveNotes() {
+      try {
+        localStorage.setItem('corkboard_notes', JSON.stringify(notes));
+      } catch (e) {
+        console.error('Failed to save to localStorage', e);
+      }
+      updateEmptyState();
+    }
 
-            noteEl.querySelector('.delete-btn').addEventListener('click', () => {
-                noteEl.style.transform = 'scale(0) rotate(20deg)';
-                noteEl.style.opacity = '0';
-                setTimeout(() => {
-                    noteEl.remove();
-                    notes = notes.filter(n => n.id != noteData.id);
-                    saveNotes();
-                    updateEmpty();
-                }, 200);
-            });
+    function renderAllNotes() {
+      board.innerHTML = '';
+      updateEmptyState();
+      notes.forEach(noteData => createNoteElement(noteData));
+    }
 
-            noteEl.querySelectorAll('.color-dot').forEach(dot => {
-                dot.addEventListener('click', (e) => {
-                    noteEl.style.backgroundColor = e.target.dataset.color;
-                    noteEl.querySelector('.pin').style.backgroundColor = e.target.dataset.pin;
-                    const idx = notes.findIndex(n => n.id == noteData.id);
-                    if (idx !== -1) {
-                        notes[idx].color = e.target.dataset.color;
-                        notes[idx].pinColor = e.target.dataset.pin;
-                        saveNotes();
-                    }
-                });
-            });
+    function createNoteElement(noteData) {
+      const noteEl = document.createElement('div');
+      noteEl.className = 'note';
+      noteEl.style.backgroundColor = noteData.color;
+      noteEl.style.transform = `rotate(${noteData.rotation || 0}deg)`;
+      noteEl.dataset.id = noteData.id;
 
-            board.appendChild(noteEl);
+      // Stickers HTML
+      const stickersHTML = (noteData.stickers || []).map((s, idx) => 
+        `<span class="sticker-badge" data-idx="${idx}" title="Clicca per rimuovere">${s}</span>`
+      ).join('');
+
+      noteEl.innerHTML = `
+        <div class="pin" style="background-color: ${noteData.pinColor}" title="Clicca per ruotare"></div>
+        
+        <!-- Toolbar -->
+        <div class="note-header">
+          <div class="note-tools">
+            <button class="tool-btn btn-color" title="Cambia colore">🎨</button>
+            <button class="tool-btn btn-font" title="Cambia font">🔤</button>
+            <button class="tool-btn btn-sticker" title="Aggiungi sticker">😊</button>
+          </div>
+          <span class="delete-btn" title="Rimuovi nota">&times;</span>
+        </div>
+
+        <!-- Color Popover -->
+        <div class="popover-panel popover-color">
+          <div style="font-size:11px; color:#636e72; font-family:sans-serif; margin-bottom:6px; font-weight:bold;">COLORE NOTA</div>
+          <div class="color-picker-grid">
+            ${colors.map(c => `<div class="color-dot" style="background-color: ${c.bg}" data-color="${c.bg}" data-pin="${c.pin}" title="${c.name}"></div>`).join('')}
+          </div>
+        </div>
+
+        <!-- Font Popover -->
+        <div class="popover-panel popover-font">
+          <div style="font-size:11px; color:#636e72; font-family:sans-serif; margin-bottom:6px; font-weight:bold;">SCEGLI FONT</div>
+          ${fonts.map(f => `<button class="font-option-btn" style="font-family:${f.family}" data-font="${f.family}">${f.name}</button>`).join('')}
+        </div>
+
+        <!-- Sticker Popover -->
+        <div class="popover-panel popover-sticker">
+          <div style="font-size:11px; color:#636e72; font-family:sans-serif; margin-bottom:6px; font-weight:bold;">INCOLLA EMOJI</div>
+          <div class="sticker-grid">
+            ${emojiStickers.map(emoji => `<button class="sticker-btn" data-emoji="${emoji}">${emoji}</button>`).join('')}
+          </div>
+        </div>
+
+        <!-- Applied Stickers container -->
+        <div class="stickers-container">${stickersHTML}</div>
+
+        <!-- Main Editable Content -->
+        <textarea class="note-content" placeholder="Scrivi una nota..." style="font-family: ${noteData.fontFamily || "'Kalam', cursive"}">${noteData.text || ''}</textarea>
+      `;
+
+      // Event listeners for text changes
+      const textarea = noteEl.querySelector('.note-content');
+      textarea.addEventListener('input', (e) => {
+        const idx = notes.findIndex(n => n.id == noteData.id);
+        if (idx !== -1) {
+          notes[idx].text = e.target.value;
+          saveNotes();
         }
+      });
 
-        function saveNotes() {
-            localStorage.setItem('corkboard_notes', JSON.stringify(notes));
+      // Pin click to rotate note slightly
+      noteEl.querySelector('.pin').addEventListener('click', () => {
+        const newRot = Number((Math.random() * 6 - 3).toFixed(1));
+        noteEl.style.transform = `rotate(${newRot}deg)`;
+        const idx = notes.findIndex(n => n.id == noteData.id);
+        if (idx !== -1) {
+          notes[idx].rotation = newRot;
+          saveNotes();
         }
+      });
 
-        window.onload = init;
-    </script>
- 
+      // Delete button listener
+      noteEl.querySelector('.delete-btn').addEventListener('click', () => {
+        noteEl.style.transform = 'scale(0) rotate(20deg)';
+        noteEl.style.opacity = '0';
+        setTimeout(() => {
+          noteEl.remove();
+          notes = notes.filter(n => n.id != noteData.id);
+          saveNotes();
+        }, 200);
+      });
+
+      // Popover triggers
+      const popoverColor = noteEl.querySelector('.popover-color');
+      const popoverFont = noteEl.querySelector('.popover-font');
+      const popoverSticker = noteEl.querySelector('.popover-sticker');
+
+      noteEl.querySelector('.btn-color').addEventListener('click', (e) => {
+        e.stopPropagation();
+        const active = popoverColor.classList.contains('active');
+        closeAllPopovers();
+        if (!active) popoverColor.classList.add('active');
+      });
+
+      noteEl.querySelector('.btn-font').addEventListener('click', (e) => {
+        e.stopPropagation();
+        const active = popoverFont.classList.contains('active');
+        closeAllPopovers();
+        if (!active) popoverFont.classList.add('active');
+      });
+
+      noteEl.querySelector('.btn-sticker').addEventListener('click', (e) => {
+        e.stopPropagation();
+        const active = popoverSticker.classList.contains('active');
+        closeAllPopovers();
+        if (!active) popoverSticker.classList.add('active');
+      });
+
+      // Color pick actions
+      popoverColor.querySelectorAll('.color-dot').forEach(dot => {
+        dot.addEventListener('click', (e) => {
+          const bg = e.target.dataset.color;
+          const pin = e.target.dataset.pin;
+          noteEl.style.backgroundColor = bg;
+          noteEl.querySelector('.pin').style.backgroundColor = pin;
+
+          const idx = notes.findIndex(n => n.id == noteData.id);
+          if (idx !== -1) {
+            notes[idx].color = bg;
+            notes[idx].pinColor = pin;
+            saveNotes();
+          }
+          closeAllPopovers();
+        });
+      });
+
+      // Font pick actions
+      popoverFont.querySelectorAll('.font-option-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const fontFam = e.target.dataset.font;
+          textarea.style.fontFamily = fontFam;
+
+          const idx = notes.findIndex(n => n.id == noteData.id);
+          if (idx !== -1) {
+            notes[idx].fontFamily = fontFam;
+            saveNotes();
+          }
+          closeAllPopovers();
+        });
+      });
+
+      // Sticker add actions
+      popoverSticker.querySelectorAll('.sticker-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const emoji = e.target.dataset.emoji;
+          const idx = notes.findIndex(n => n.id == noteData.id);
+          if (idx !== -1) {
+            if (!notes[idx].stickers) notes[idx].stickers = [];
+            if (notes[idx].stickers.length < 8) {
+              notes[idx].stickers.push(emoji);
+              saveNotes();
+              renderAllNotes();
+            }
+          }
+        });
+      });
+
+      // Sticker remove action
+      noteEl.querySelectorAll('.sticker-badge').forEach(badge => {
+        badge.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const sIdx = parseInt(e.target.dataset.idx, 10);
+          const idx = notes.findIndex(n => n.id == noteData.id);
+          if (idx !== -1 && notes[idx].stickers) {
+            notes[idx].stickers.splice(sIdx, 1);
+            saveNotes();
+            renderAllNotes();
+          }
+        });
+      });
+
+      board.appendChild(noteEl);
+    }
+
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
 </body>
 </html>
